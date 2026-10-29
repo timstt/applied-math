@@ -31,7 +31,7 @@ pip install numpy sympy matplotlib
 Run a lab from its folder, for example:
 
 ```bash
-python lab4/lab4/lab4.py
+python lab4/lab4.py
 ```
 
 ## Author
