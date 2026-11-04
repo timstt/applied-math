@@ -2,7 +2,7 @@
 
 Laboratory assignments for the **Applied Mathematics** course (Software Engineering, Taras Shevchenko National University of Kyiv), implemented in **Python**.
 
-The labs cover linear and vector algebra, 2D and 3D plotting, and animation of curves and surfaces.
+The labs cover linear and vector algebra, 2D and 3D plotting, animation of curves and surfaces, and basic calculus.
 
 ## Labs
 
@@ -12,6 +12,7 @@ The labs cover linear and vector algebra, 2D and 3D plotting, and animation of c
 | 2 | 2D graphics with Matplotlib | Bar and pie diagrams, geometric primitives and a regular polygon, implicit, parametric and polar curves, function plots | [lab2](./lab2) |
 | 3 | 3D graphics with Matplotlib | Hemisphere, arrow, pyramid, ellipsoid, box and cone, prism with arrow edges, surfaces of revolution, colored surfaces, 3D bar charts, mosaic of plots | [lab3](./lab3) |
 | 4 | Animation | Curve moving back and forth with color changes, animated surface of revolution, animated polar curve (`FuncAnimation`) | [lab4](./lab4) |
+| 5 | Calculus basics | Areas of plane figures (Cartesian, polar, parametric), arc lengths, roots of a complex number, Fourier series, sum of a numeric series (SymPy, Matplotlib) | [lab5](./lab5) |
 
 ## Tech stack
 
