@@ -11,7 +11,7 @@ x, t, n = symbols('x t n', real=True)
 # Площа фігури: y = sin^4(x)*sin(2x), y = 0, 0 <= x <= pi/3
 f = sin(x)**4 * sin(2*x)
 S = integrate(f, (x, 0, pi/3))
-print('8.1.23  S =', S, '=', S.evalf())
+print('8.1.23  S =', S)
 
 X = np.linspace(0, np.pi/2, 200)
 Y = np.sin(X)**4 * np.sin(2*X)
@@ -32,7 +32,7 @@ t0 = solve(Eq(r1, r2), t)[0]          # кут перетину кіл = pi/3
 print('Точка перетину t0 =', t0)
 S = integrate(r2**2, (t, 0, t0))/2 + integrate(r1**2, (t, t0, pi/2))/2
 S = simplify(S)
-print('8.2.23  S =', S, '=', S.evalf())
+print('8.2.23  S =', S)
 
 T = np.linspace(0, np.pi, 200)
 plt.plot(np.sqrt(3)*np.cos(T)*np.cos(T), np.sqrt(3)*np.cos(T)*np.sin(T), 'b')
@@ -58,7 +58,7 @@ print('t1 =', t1, '  t2 =', t2)
 width = xt.subs(t, 2*pi - t) - xt     # ширина фігури (права гілка мінус ліва)
 S = integrate(width * diff(yt, t), (t, t1, t2))
 S = simplify(S)
-print('8.3.23  S =', S, '=', S.evalf())
+print('8.3.23  S =', S)
 
 T = np.linspace(0, 2*np.pi, 300)
 plt.plot(2*(T - np.sin(T)), 2*(1 - np.cos(T)), 'b')
@@ -82,7 +82,7 @@ df = diff(f, x)
 print("y' =", simplify(df))
 print("1 + y'^2 =", simplify(1 + df**2))           # = 2/(1 - x)
 L = integrate(sqrt(2/(1 - x)), (x, 0, Rational(3, 4)))
-print('8.4.23  L =', L, '=', L.evalf())
+print('8.4.23  L =', L)
 
 p = plot(f, (x, 0, Rational(3, 4)), title='8.4.23', line_color='r')
 
@@ -96,7 +96,7 @@ dy = diff(yt, t)
 print("x' =", simplify(dx), "   y' =", simplify(dy))
 print("x'^2 + y'^2 =", simplify(dx**2 + dy**2))     # = 4t^2
 L = integrate(2*t, (t, 0, pi))
-print('8.5.23  L =', L, '=', L.evalf())
+print('8.5.23  L =', L)
 
 p = plot_parametric(xt, yt, (t, 0, pi), title='8.5.23', line_color='r', aspect_ratio=(1, 1))
 
