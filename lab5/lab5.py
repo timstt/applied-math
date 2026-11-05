@@ -1,4 +1,3 @@
-# Лабораторна 5. Основні поняття математичного аналізу (sympy, matplotlib). Варіант 23
 from sympy import *
 from sympy.plotting import plot, plot_parametric
 import matplotlib.pyplot as plt
@@ -13,12 +12,10 @@ f = sin(x)**4 * sin(2*x)
 S = integrate(f, (x, 0, pi/3))
 print('8.1.23  S =', S)
 
-X = np.linspace(0, np.pi/2, 200)
+X = np.linspace(0, np.pi/3, 200)
 Y = np.sin(X)**4 * np.sin(2*X)
-X1 = np.linspace(0, np.pi/3, 200)
-Y1 = np.sin(X1)**4 * np.sin(2*X1)
 plt.plot(X, Y, 'b')
-plt.fill_between(X1, Y1, color='orange')
+plt.fill_between(X, Y, color='orange')
 plt.title('8.1.23')
 plt.grid()
 plt.show()
