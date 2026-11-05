@@ -26,9 +26,9 @@ plt.show()
 r1 = sqrt(3)*cos(t)
 r2 = sin(t)
 t0 = solve(Eq(r1, r2), t)[0]          # кут перетину кіл = pi/3
-print('Точка перетину t0 =', t0)
+print('8.2.23  Точка перетину t0 =', t0)
 S = integrate(r2**2, (t, 0, t0))/2 + integrate(r1**2, (t, t0, pi/2))/2
-print('8.2.23  S =', S)
+print('        S =', S)
 
 T = np.linspace(0, np.pi, 200)
 plt.plot(np.sqrt(3)*np.cos(T)*np.cos(T), np.sqrt(3)*np.cos(T)*np.sin(T), 'b')
@@ -50,11 +50,11 @@ xt = 2*(t - sin(t))
 yt = 2*(1 - cos(t))
 t1 = solve(Eq(yt, 2), t)[0]           # y = 2  ->  t = pi/2
 t2 = solve(Eq(yt, 3), t)[0]           # y = 3  ->  t = 2pi/3
-print('t1 =', t1, '  t2 =', t2)
+print('8.3.23  t1 =', t1, '  t2 =', t2)
 width = xt.subs(t, 2*pi - t) - xt     # ширина фігури (права гілка мінус ліва)
 S = integrate(width * diff(yt, t), (t, t1, t2))
 S = simplify(S)
-print('8.3.23  S =', S)
+print('        S =', S)
 
 T = np.linspace(0, 2*np.pi, 300)
 plt.plot(2*(T - np.sin(T)), 2*(1 - np.cos(T)), 'b')
@@ -75,10 +75,10 @@ plt.show()
 # Довжина лінії y = 1 + arcsin(x) - sqrt(1 - x^2),  x від 0 до 3/4
 f = 1 + asin(x) - sqrt(1 - x**2)
 df = diff(f, x)
-print("y' =", simplify(df))
-print("1 + y'^2 =", simplify(1 + df**2))           # = 2/(1 - x)
+print("8.4.23  y' =", simplify(df))
+print("        1 + y'^2 =", simplify(1 + df**2))           # = 2/(1 - x)
 L = integrate(sqrt(2/(1 - x)), (x, 0, Rational(3, 4)))
-print('8.4.23  L =', L)
+print('        L =', L)
 
 p = plot(f, (x, 0, Rational(3, 4)), title='8.4.23', line_color='r')
 
@@ -89,10 +89,10 @@ xt = 2*(cos(t) + t*sin(t))
 yt = 2*(sin(t) - t*cos(t))
 dx = diff(xt, t)
 dy = diff(yt, t)
-print("x' =", simplify(dx), "   y' =", simplify(dy))
-print("x'^2 + y'^2 =", simplify(dx**2 + dy**2))     # = 4t^2
+print("8.5.23  x' =", simplify(dx), "   y' =", simplify(dy))
+print("        x'^2 + y'^2 =", simplify(dx**2 + dy**2))     # = 4t^2
 L = integrate(2*t, (t, 0, pi))
-print('8.5.23  L =', L)
+print('        L =', L)
 
 p = plot_parametric(xt, yt, (t, 0, pi), title='8.5.23', line_color='r', aspect_ratio=(1, 1))
 
