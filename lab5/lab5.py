@@ -28,7 +28,6 @@ r2 = sin(t)
 t0 = solve(Eq(r1, r2), t)[0]          # кут перетину кіл = pi/3
 print('Точка перетину t0 =', t0)
 S = integrate(r2**2, (t, 0, t0))/2 + integrate(r1**2, (t, t0, pi/2))/2
-S = simplify(S)
 print('8.2.23  S =', S)
 
 T = np.linspace(0, np.pi, 200)
