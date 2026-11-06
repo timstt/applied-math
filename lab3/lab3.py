@@ -1,3 +1,4 @@
+# Лабораторна 3. 3D-графіка (matplotlib). Варіант 23
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
