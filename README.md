@@ -14,7 +14,7 @@ The labs cover linear and vector algebra, 2D and 3D plotting, animation of curve
 | 4 | Animation | Curve moving back and forth with color changes, animated surface of revolution, animated polar curve (`FuncAnimation`) | [lab4](./lab4) |
 | 5 | Calculus basics | Areas of plane figures (Cartesian, polar, parametric), arc lengths, roots of a complex number, Fourier series, sum of a numeric series (SymPy, Matplotlib) | [lab5](./lab5) |
 | 6 | Differential equations and double integrals | General and particular solutions of linear ODEs, a system of ODEs, a double integral over a region, area of a region in Cartesian and polar coordinates (SymPy, Matplotlib) | [lab6](./lab6) |
-| STEM | Second-order curves and surfaces of revolution | Ellipse from its foci and a point on it (with eccentricity and directrices), surface of revolution of a line around `Oz` (a cone), 2D and 3D plots (SymPy, Matplotlib) | [stem](./stem) |
+| STEM | Second-order curves | Equation of a hyperbola from the four points where its directrices meet its asymptotes, with eccentricity and foci; a labeled, decorated plot and an animation of a point moving along the hyperbola with its focal radii (`|r1 - r2| = 2a`) (SymPy, Matplotlib, `FuncAnimation`) | [stem](./stem) |
 
 ## Tech stack
 
