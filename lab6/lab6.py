@@ -1,3 +1,4 @@
+# Лабораторна 6. Диференціальні рівняння та подвійні інтеграли (sympy). Варіант 23
 from sympy import *
 from sympy.plotting import plot
 import matplotlib.pyplot as plt
