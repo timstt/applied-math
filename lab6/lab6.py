@@ -62,15 +62,20 @@ plt.show()
 
 # ---------------- 1.3.23 ----------------
 # Площа D: x^2 + y^2 + 12y <= 0,  y >= sqrt(3)*x,  sqrt(3)*y <= x
-# Полярна система: коло r = -12 sin(phi), промені phi = 7pi/6 і phi = 4pi/3
-S_pol = integrate(integrate(r, (r, 0, -12*sin(phi))), (phi, 7*pi/6, 4*pi/3))
-print('1.3.23  S (полярна)  =', simplify(S_pol))
-
-# Декартова система: точки перетину прямих з колом
+# Точки перетину прямих з колом
 P1 = solve([xs**2 + ys**2 + 12*ys, ys - sqrt(3)*xs], [xs, ys])
 P2 = solve([xs**2 + ys**2 + 12*ys, ys - xs/sqrt(3)], [xs, ys])
-print('        точки перетину:', P1, P2)
-# обидві точки мають x = -3sqrt3, тому область ділимо на дві частини:
+print('1.3.23  точки перетину:', P1, P2)
+
+# Полярна система: кути променів беремо з точок перетину (atan2 дає кут від -pi до pi)
+phi1 = atan2(P2[1][1], P2[1][0]) + 2*pi
+phi2 = atan2(P1[1][1], P1[1][0]) + 2*pi
+print('        промені: phi1 =', phi1, '  phi2 =', phi2)
+# коло r = -12 sin(phi)
+S_pol = integrate(integrate(r, (r, 0, -12*sin(phi))), (phi, phi1, phi2))
+print('        S (полярна)  =', simplify(S_pol))
+
+# Декартова система: обидві точки мають x = -3sqrt3, тому область ділимо на дві частини:
 # частина 1: -6 <= x <= -3sqrt3, між дугами кола
 # частина 2: -3sqrt3 <= x <= 0, між прямими y = sqrt(3)x і y = x/sqrt(3)
 a = P1[1][0]
@@ -88,7 +93,9 @@ ax.plot(6*np.cos(T), -6 + 6*np.sin(T), 'b', label='$x^2+y^2+12y=0$')
 Xl = np.linspace(-7, 2, 100)
 ax.plot(Xl, np.sqrt(3)*Xl, 'g', label='$y=\\sqrt{3}x$')
 ax.plot(Xl, Xl/np.sqrt(3), 'r', label='$\\sqrt{3}y=x$')
-F = np.linspace(7*np.pi/6, 4*np.pi/3, 100)
+f1 = float(phi1)
+f2 = float(phi2)
+F = np.linspace(f1, f2, 100)
 R = -12*np.sin(F)
 ax.fill(np.concatenate([[0], R*np.cos(F)]), np.concatenate([[0], R*np.sin(F)]), color='orange')
 ax.set_xlim(-8, 8)
@@ -101,8 +108,8 @@ ax.set_title('1.3.23 (декартова)')
 ax = fig.add_subplot(1, 2, 2, projection='polar')
 Fc = np.linspace(np.pi, 2*np.pi, 200)
 ax.plot(Fc, -12*np.sin(Fc), 'b', label='$r=-12\\sin\\varphi$')
-ax.plot([7*np.pi/6, 7*np.pi/6], [0, 13], 'r', label='$\\varphi=7\\pi/6$')
-ax.plot([4*np.pi/3, 4*np.pi/3], [0, 13], 'g', label='$\\varphi=4\\pi/3$')
+ax.plot([f1, f1], [0, 13], 'r', label='$\\varphi=7\\pi/6$')
+ax.plot([f2, f2], [0, 13], 'g', label='$\\varphi=4\\pi/3$')
 ax.fill_between(F, 0, R, color='orange')
 ax.set_rmax(13)
 ax.legend(loc='upper right')
