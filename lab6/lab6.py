@@ -42,13 +42,16 @@ print('        перевірка:', checkodesol(sys_, sol))
 # Подвійний інтеграл (x - 2y + 5) по D: y = 0, y = 1, y = sqrt(-x), x = 2
 # D: 0 <= y <= 1,  -y^2 <= x <= 2
 xs, ys = symbols('x y', real=True)
-I = integrate(xs - 2*ys + 5, (xs, -ys**2, 2), (ys, 0, 1))
-print('1.2.23  I =', I)
+xl = solve(Eq(ys, sqrt(-xs)), xs)[0]          # ліва межа: виражаємо x через y
+print('1.2.23  ліва межа: x =', xl)
+I = integrate(xs - 2*ys + 5, (xs, xl, 2), (ys, 0, 1))
+print('        I =', I)
 
+fx = lambdify(ys, xl)                         # формула -> функція для NumPy
 Yv = np.linspace(0, 1, 200)
-plt.fill_betweenx(Yv, -Yv**2, 2, color='orange')
+plt.fill_betweenx(Yv, fx(Yv), 2, color='orange')
 Yc = np.linspace(0, 1.3, 200)
-plt.plot(-Yc**2, Yc, 'b', label='$y=\\sqrt{-x}$')
+plt.plot(fx(Yc), Yc, 'b', label='$y=\\sqrt{-x}$')
 plt.axhline(0, color='g', label='$y=0$')
 plt.axhline(1, color='r', label='$y=1$')
 plt.axvline(2, color='m', label='$x=2$')
@@ -62,24 +65,31 @@ plt.show()
 
 # ---------------- 1.3.23 ----------------
 # Площа D: x^2 + y^2 + 12y <= 0,  y >= sqrt(3)*x,  sqrt(3)*y <= x
+circle = xs**2 + ys**2 + 12*ys
+
 # Точки перетину прямих з колом
-P1 = solve([xs**2 + ys**2 + 12*ys, ys - sqrt(3)*xs], [xs, ys])
-P2 = solve([xs**2 + ys**2 + 12*ys, ys - xs/sqrt(3)], [xs, ys])
+P1 = solve([circle, ys - sqrt(3)*xs], [xs, ys])
+P2 = solve([circle, ys - xs/sqrt(3)], [xs, ys])
 print('1.3.23  точки перетину:', P1, P2)
 
 # Полярна система: кути променів беремо з точок перетину (atan2 дає кут від -pi до pi)
 phi1 = atan2(P2[1][1], P2[1][0]) + 2*pi
 phi2 = atan2(P1[1][1], P1[1][0]) + 2*pi
 print('        промені: phi1 =', phi1, '  phi2 =', phi2)
-# коло r = -12 sin(phi)
-S_pol = integrate(integrate(r, (r, 0, -12*sin(phi))), (phi, phi1, phi2))
+# рівняння кола в полярних: підставляємо x = r cos(phi), y = r sin(phi) і розв'язуємо відносно r
+rc = solve(circle.subs({xs: r*cos(phi), ys: r*sin(phi)}), r)[1]
+print('        коло: r =', rc)
+S_pol = integrate(integrate(r, (r, 0, rc)), (phi, phi1, phi2))
 print('        S (полярна)  =', simplify(S_pol))
 
 # Декартова система: обидві точки мають x = -3sqrt3, тому область ділимо на дві частини:
-# частина 1: -6 <= x <= -3sqrt3, між дугами кола
+# частина 1: від лівого краю кола до -3sqrt3, між дугами кола
 # частина 2: -3sqrt3 <= x <= 0, між прямими y = sqrt(3)x і y = x/sqrt(3)
 a = P1[1][0]
-S1 = integrate(2*sqrt(36 - xs**2), (xs, -6, a))
+y_low, y_up = solve(circle, ys)               # нижня і верхня дуги кола
+x_left, x_right = solve(y_up - y_low, xs)     # краї кола, де дуги сходяться
+print('        дуги: y =', y_low, ',', y_up, '   краї кола: x =', x_left, ',', x_right)
+S1 = integrate(y_up - y_low, (xs, x_left, a))
 S2 = integrate(xs/sqrt(3) - sqrt(3)*xs, (xs, a, 0))
 S_dec = simplify(S1 + S2)
 print('        S (декартова) =', S_dec)
@@ -88,15 +98,17 @@ print('        збігаються:', simplify(S_pol - S_dec) == 0)
 fig = plt.figure(figsize=(12, 6))
 
 ax = fig.add_subplot(1, 2, 1)
-T = np.linspace(0, 2*np.pi, 300)
-ax.plot(6*np.cos(T), -6 + 6*np.sin(T), 'b', label='$x^2+y^2+12y=0$')
+Xc = np.linspace(float(x_left), float(x_right), 300)
+ax.plot(Xc, lambdify(xs, y_up)(Xc), 'b', label='$x^2+y^2+12y=0$')
+ax.plot(Xc, lambdify(xs, y_low)(Xc), 'b')
 Xl = np.linspace(-7, 2, 100)
 ax.plot(Xl, np.sqrt(3)*Xl, 'g', label='$y=\\sqrt{3}x$')
 ax.plot(Xl, Xl/np.sqrt(3), 'r', label='$\\sqrt{3}y=x$')
 f1 = float(phi1)
 f2 = float(phi2)
+fr = lambdify(phi, rc)
 F = np.linspace(f1, f2, 100)
-R = -12*np.sin(F)
+R = fr(F)
 ax.fill(np.concatenate([[0], R*np.cos(F)]), np.concatenate([[0], R*np.sin(F)]), color='orange')
 ax.set_xlim(-8, 8)
 ax.set_ylim(-13, 3)
@@ -107,7 +119,7 @@ ax.set_title('1.3.23 (декартова)')
 
 ax = fig.add_subplot(1, 2, 2, projection='polar')
 Fc = np.linspace(np.pi, 2*np.pi, 200)
-ax.plot(Fc, -12*np.sin(Fc), 'b', label='$r=-12\\sin\\varphi$')
+ax.plot(Fc, fr(Fc), 'b', label='$r=-12\\sin\\varphi$')
 ax.plot([f1, f1], [0, 13], 'r', label='$\\varphi=7\\pi/6$')
 ax.plot([f2, f2], [0, 13], 'g', label='$\\varphi=4\\pi/3$')
 ax.fill_between(F, 0, R, color='orange')
