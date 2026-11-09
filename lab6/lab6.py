@@ -1,6 +1,4 @@
-# Лабораторна 6. Диференціальні рівняння та подвійні інтеграли (sympy). Варіант 23
 from sympy import *
-from sympy.plotting import plot
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -68,10 +66,14 @@ plt.show()
 S_pol = integrate(integrate(r, (r, 0, -12*sin(phi))), (phi, 7*pi/6, 4*pi/3))
 print('1.3.23  S (полярна)  =', simplify(S_pol))
 
-# Декартова система: прямі перетинають коло в точках (-3sqrt3, -9) і (-3sqrt3, -3)
+# Декартова система: точки перетину прямих з колом
+P1 = solve([xs**2 + ys**2 + 12*ys, ys - sqrt(3)*xs], [xs, ys])
+P2 = solve([xs**2 + ys**2 + 12*ys, ys - xs/sqrt(3)], [xs, ys])
+print('        точки перетину:', P1, P2)
+# обидві точки мають x = -3sqrt3, тому область ділимо на дві частини:
 # частина 1: -6 <= x <= -3sqrt3, між дугами кола
 # частина 2: -3sqrt3 <= x <= 0, між прямими y = sqrt(3)x і y = x/sqrt(3)
-a = -3*sqrt(3)
+a = P1[1][0]
 S1 = integrate(2*sqrt(36 - xs**2), (xs, -6, a))
 S2 = integrate(xs/sqrt(3) - sqrt(3)*xs, (xs, a, 0))
 S_dec = simplify(S1 + S2)
