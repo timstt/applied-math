@@ -35,22 +35,29 @@ X = Function('x')
 Y = Function('y')
 sys_ = [Eq(X(t).diff(t), 2*X(t) + 3*Y(t) + sin(t)),
         Eq(Y(t).diff(t), -3*X(t) + 2*Y(t) + cos(t))]
-sol = dsolve(sys_, [X(t), Y(t)])
-print('4.1.23  ', simplify(sol[0]))
-print('        ', simplify(sol[1]))
-print('        перевірка:', checkodesol(sys_, sol))
+# Метод виключення
+y_expr = solve(sys_[0], Y(t))[0]
+print('4.1.23  1) y =', y_expr)
+eq_x = sys_[1].subs(Y(t), y_expr).doit()
+eq_x = Eq(numer(together(eq_x.lhs - eq_x.rhs)), 0)
+print('        2)', eq_x)
+x_sol = dsolve(eq_x, X(t))
+print('        3)', x_sol)
+y_sol = Eq(Y(t), simplify(y_expr.subs(X(t), x_sol.rhs).doit()))
+print('        4)', y_sol)
+print('        перевірка:', checkodesol(sys_, [x_sol, y_sol]))
 
 
 # ---------------- 1.2.23 ----------------
-# Обчисліть подвійний інтеграл ∬_D f(x, y)dxdy по області D.
-# ∬_D (x - 2y + 5)dxdy, якщо область D обмежена лініями: y = 0, y = 1, y = sqrt(-x), x = 2
+# Обчисліть подвійний інтеграл _D f(x, y)dxdy по області D.
+# _D (x - 2y + 5)dxdy, якщо область D обмежена лініями: y = 0, y = 1, y = sqrt(-x), x = 2
 xs, ys = symbols('x y', real=True)
-xl = solve(Eq(ys, sqrt(-xs)), xs)[0]          # ліва межа: виражаємо x через y
+xl = solve(Eq(ys, sqrt(-xs)), xs)[0]          
 print('1.2.23  ліва межа: x =', xl)
 I = integrate(xs - 2*ys + 5, (xs, xl, 2), (ys, 0, 1))
 print('        I =', I)
 
-fx = lambdify(ys, xl)                         # формула -> функція для NumPy
+fx = lambdify(ys, xl)                       
 Yv = np.linspace(0, 1, 200)
 plt.fill_betweenx(Yv, fx(Yv), 2, color='orange')
 Yc = np.linspace(0, 1.3, 200)
@@ -70,19 +77,17 @@ plt.show()
 # Обчисліть площу області D, задану системою нерівностей. Обчислення проведіть у полярній системі координат.
 # x^2 + y^2 + 12y <= 0,  y >= sqrt(3)*x,  sqrt(3)*y <= x
 circle = xs**2 + ys**2 + 12*ys
-line1 = ys - sqrt(3)*xs                       # пряма y = sqrt(3)x
-line2 = sqrt(3)*ys - xs                       # пряма sqrt(3)y = x
+line1 = ys - sqrt(3)*xs                       
+line2 = sqrt(3)*ys - xs                      
 
-# Точки перетину прямих з колом
 P1 = solve([circle, line1], [xs, ys])
 P2 = solve([circle, line2], [xs, ys])
 print('1.3.23  точки перетину:', P1, P2)
 
-# Полярна система: кути променів беремо з точок перетину (atan2 дає кут від -pi до pi)
 phi1 = atan2(P2[1][1], P2[1][0]) + 2*pi
 phi2 = atan2(P1[1][1], P1[1][0]) + 2*pi
 print('        промені: phi1 =', phi1, '  phi2 =', phi2)
-# рівняння кола в полярних: підставляємо x = r cos(phi), y = r sin(phi) і розв'язуємо відносно r
+
 rc = solve(circle.subs({xs: r*cos(phi), ys: r*sin(phi)}), r)[1]
 print('        коло: r =', rc)
 S_pol = integrate(r, (r, 0, rc), (phi, phi1, phi2))
@@ -92,19 +97,15 @@ print('        S (полярна)  =', simplify(S_pol))
 # частина 1: від лівого краю кола до -3sqrt3, між дугами кола
 # частина 2: -3sqrt3 <= x <= 0, між прямими y = sqrt(3)x і y = x/sqrt(3)
 a = P1[1][0]
-x0 = P1[0][0]                                 # вершина (0, 0), де перетинаються прямі
-y1 = solve(line1, ys)[0]                      # виражаємо y з рівнянь прямих
+x0 = P1[0][0]                                 
+y1 = solve(line1, ys)[0]                     
 y2 = solve(line2, ys)[0]
-if (y2 - y1).subs(xs, (a + x0)/2) > 0:        # яка пряма зверху: перевіряємо в точці посередині
-    y_top, y_bot = y2, y1
-else:
-    y_top, y_bot = y1, y2
-print('        прямі: зверху y =', y_top, ', знизу y =', y_bot)
-y_low, y_up = solve(circle, ys)               # нижня і верхня дуги кола
-x_left, x_right = solve(y_up - y_low, xs)     # краї кола, де дуги сходяться
+print('        прямі: зверху y =', y2, ', знизу y =', y1)
+y_low, y_up = solve(circle, ys)
+x_left, x_right = solve(y_up - y_low, xs) 
 print('        дуги: y =', y_low, ',', y_up, '   краї кола: x =', x_left, ',', x_right)
 S1 = integrate(y_up - y_low, (xs, x_left, a))
-S2 = integrate(y_top - y_bot, (xs, a, x0))
+S2 = integrate(y2 - y1, (xs, a, x0))          # зверху пряма y2 = x/sqrt(3), знизу y1 = sqrt(3)x
 S_dec = simplify(S1 + S2)
 print('        S (декартова) =', S_dec)
 print('        збігаються:', simplify(S_pol - S_dec) == 0)
