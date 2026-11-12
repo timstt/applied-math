@@ -1,39 +1,59 @@
-# STEM-проєкт. Гіпербола: канонічне рівняння, зображення та анімація (sympy, matplotlib). Варіант 23 (ІПЗ 21) — задача 1.43
 from sympy import *
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 import numpy as np
 
 x, y = symbols('x y', real=True)
-a, b, c = symbols('a b c', positive=True)
+a, b, c, e = symbols('a b c e', positive=True)
 
 
 # ---------------- 1.43 ----------------
 # Скласти рівняння гіперболи x^2/a^2 - y^2/b^2 = 1, знаючи чотири точки (±4, ±2)
-# перетину її директрис x = ±a^2/c з асимптотами y = ±(b/a)x,  c^2 = a^2 + b^2
+# перетину її директрис і асимптот.
 #
-# Точка перетину директриси x = a^2/c з асимптотою y = (b/a)x:  (a^2/c, ab/c)
-Px, Py = 4, 2
-sol = solve([Eq(a**2/c, Px),
-             Eq(a*b/c, Py),
-             Eq(c**2, a**2 + b**2)], [a, b, c], dict=True)[0]
-A, B, C = sol[a], sol[b], sol[c]
-e = C/A
+# 1) Рівняння директрис і асимптот гіперболи:
+#    директриси  x = a/e,  x = -a/e
+#    асимптоти   y = (b/a)x,  y = -(b/a)x
+#    і зв'язок   c^2 = a^2 + b^2,  e = c/a
+dir1 = Eq(x, a/e)
+dir2 = Eq(x, -a/e)
+as1 = Eq(y, b/a*x)
+as2 = Eq(y, -b/a*x)
+print('1.43    директриси:', dir1, ',', dir2)
+print('        асимптоти: ', as1, ',', as2)
+
+# 2) Кожна точка перетину лежить на одній директрисі й одній асимптоті:
+#    (4, 2):   x = a/e,  y = (b/a)x       (4, -2):  x = a/e,  y = -(b/a)x
+#    (-4, 2):  x = -a/e, y = -(b/a)x      (-4, -2): x = -a/e, y = (b/a)x
+points = {(4, 2): (dir1, as1), (4, -2): (dir1, as2),
+          (-4, 2): (dir2, as2), (-4, -2): (dir2, as1)}
+
+# 3) Підставляємо всі 4 точки — отримуємо систему
+system = []
+for (px, py), (dr, asy) in points.items():
+    for eq in (dr, asy):
+        eq_p = eq.subs({x: px, y: py})
+        if eq_p not in system:                      # однакові рівняння беремо один раз
+            system.append(eq_p)
+system += [Eq(c**2, a**2 + b**2), Eq(e, c/a)]
+print('        система:')
+for eq in system:
+    print('           ', eq)
+
+# 4) Розв'язуємо систему
+sol = solve(system, [a, b, c, e], dict=True)[0]
+A, B, C, E = sol[a], sol[b], sol[c], sol[e]
 hyperbola = Eq(x**2/A**2 - y**2/B**2, 1)
-print('1.43    a =', A, ', b =', B, ', c =', C)
+print('        розв\'язок: a =', A, ', b =', B, ', c =', C, ', e =', E)
+print('        a^2 =', A**2, ', b^2 =', B**2)
 print('        рівняння гіперболи:', hyperbola)
-print('        ексцентриситет e =', e)
-print('        директриси: x = ±', A**2/C, ',  асимптоти: y = ±', B/A, '* x')
 print('        фокуси: (±', C, ', 0)')
 
-# Перевірка: директриси та асимптоти перетинаються саме в точках (±4, ±2)
-pts = []
-for sx in (1, -1):
-    for sy in (1, -1):
-        X0 = sx*A**2/C
-        pts.append((X0, solve(Eq(y, sy*B/A*X0), y)[0]))
-print('        перевірка, точки перетину:', pts)
-print('        збігаються з (±4, ±2):', set(pts) == {(4, 2), (4, -2), (-4, 2), (-4, -2)})
+# Перевірка: всі 4 точки задовольняють знайдені рівняння директрис і асимптот
+ok = all(dr.subs({a: A, e: E, x: px}) == True and asy.subs({a: A, b: B, x: px, y: py}) == True
+         for (px, py), (dr, asy) in points.items())
+print('        перевірка, всі 4 точки на директрисах і асимптотах:', ok)
+e = E
 
 
 # ---------------- Зображення ----------------
