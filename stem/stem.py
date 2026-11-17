@@ -91,9 +91,8 @@ def redraw(i):
     line_r2.set_data([c1, xm], [0, ym])
     r1 = np.sqrt((xm + c1)**2 + ym**2)
     r2 = np.sqrt((xm - c1)**2 + ym**2)
-    ax.set_title('r1 = ' + str(round(r1, 2)) + ',  r2 = ' + str(round(r2, 2)) +
-                 ',  |r1 - r2| = ' + str(round(abs(r1 - r2), 2)) +
-                 ' = 2a = ' + str(round(2*a1, 2)))
+    ax.set_title('r1 = {0:.2f},  r2 = {1:.2f},  |r1 - r2| = {2:.2f} = 2a = {3:.2f}'
+                 .format(r1, r2, abs(r1 - r2), 2*a1))
 
 
 anim = animation.FuncAnimation(fig, redraw, frames=2*N, interval=40)
