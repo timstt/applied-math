@@ -1,9 +1,10 @@
 from sympy import *
-from matplotlib.animation import FuncAnimation
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from matplotlib.patches import Rectangle
 
-x, y = symbols('x y', real=True)
+x, y = symbols('x y')
 a, b, c, e = symbols('a b c e', positive=True)
 
 
@@ -11,159 +12,134 @@ a, b, c, e = symbols('a b c e', positive=True)
 # Скласти рівняння гіперболи x^2/a^2 - y^2/b^2 = 1, знаючи чотири точки (±4, ±2)
 # перетину її директрис і асимптот.
 #
-# 1) Рівняння директрис і асимптот гіперболи:
-#    директриси  x = a/e,  x = -a/e
-#    асимптоти   y = (b/a)x,  y = -(b/a)x
-#    і зв'язок   c^2 = a^2 + b^2,  e = c/a
-dir1 = Eq(x, a/e)
-dir2 = Eq(x, -a/e)
-as1 = Eq(y, b/a*x)
-as2 = Eq(y, -b/a*x)
-print('1.43    директриси:', dir1, ',', dir2)
-print('        асимптоти: ', as1, ',', as2)
-
-# 2) Кожна точка перетину лежить на одній директрисі й одній асимптоті:
-#    (4, 2):   x = a/e,  y = (b/a)x       (4, -2):  x = a/e,  y = -(b/a)x
-#    (-4, 2):  x = -a/e, y = -(b/a)x      (-4, -2): x = -a/e, y = (b/a)x
-points = {(4, 2): (dir1, as1), (4, -2): (dir1, as2),
-          (-4, 2): (dir2, as2), (-4, -2): (dir2, as1)}
-
-# 3) Підставляємо всі 4 точки — отримуємо систему
-system = []
-for (px, py), (dr, asy) in points.items():
-    for eq in (dr, asy):
-        eq_p = eq.subs({x: px, y: py})
-        if eq_p not in system:                      # однакові рівняння беремо один раз
-            system.append(eq_p)
-system += [Eq(c**2, a**2 + b**2), Eq(e, c/a)]
-print('        система:')
+# Директриси:  x = a/e,  x = -a/e
+# Асимптоти:   y = (b/a)x,  y = -(b/a)x
+# Зв'язок:     c^2 = a^2 + b^2,  e = c/a
+#
+# Кожна точка лежить на одній директрисі й одній асимптоті:
+#   (4, 2):   x = a/e,   y = (b/a)x
+#   (4, -2):  x = a/e,   y = -(b/a)x
+#   (-4, 2):  x = -a/e,  y = -(b/a)x
+#   (-4, -2): x = -a/e,  y = (b/a)x
+# Підставляємо всі 4 точки і отримуємо систему:
+system = [Eq(4, a/e), Eq(2, b/a*4),
+          Eq(4, a/e), Eq(-2, -b/a*4),
+          Eq(-4, -a/e), Eq(2, -b/a*(-4)),
+          Eq(-4, -a/e), Eq(-2, b/a*(-4)),
+          Eq(c**2, a**2 + b**2),
+          Eq(e, c/a)]
+print('1.43    система:')
 for eq in system:
     print('           ', eq)
 
-# 4) Розв'язуємо систему
-sol = solve(system, [a, b, c, e], dict=True)[0]
-A, B, C, E = sol[a], sol[b], sol[c], sol[e]
-hyperbola = Eq(x**2/A**2 - y**2/B**2, 1)
-print('        розв\'язок: a =', A, ', b =', B, ', c =', C, ', e =', E)
+sol = solve(system, [a, b, c, e])
+A, B, C, E = sol[0]
+print('        a =', A, ', b =', B, ', c =', C, ', e =', E)
 print('        a^2 =', A**2, ', b^2 =', B**2)
-print('        рівняння гіперболи:', hyperbola)
+print('        рівняння гіперболи:', Eq(x**2/A**2 - y**2/B**2, 1))
+print('        директриси: x = ±', A/E, ',  асимптоти: y = ±', B/A, '* x')
 print('        фокуси: (±', C, ', 0)')
 
-# Перевірка: всі 4 точки задовольняють знайдені рівняння директрис і асимптот
-ok = all(dr.subs({a: A, e: E, x: px}) == True and asy.subs({a: A, b: B, x: px, y: py}) == True
-         for (px, py), (dr, asy) in points.items())
-print('        перевірка, всі 4 точки на директрисах і асимптотах:', ok)
-e = E
+# Перевірка: підставляємо знайдені a, b, e у праву частину рівнянь директрис і асимптот
+print('        перевірка (4, 2):  x =', (A/E), ', y =', B/A*4)
+print('        перевірка (-4, -2): x =', (-A/E), ', y =', B/A*(-4))
 
 
 # ---------------- Зображення ----------------
-af, bf, cf, ef = float(A), float(B), float(C), float(e)
-d = af**2/cf                                         # директриси x = ±d
-L = 13                                               # межа вікна по x
+a1 = float(A)
+b1 = float(B)
+c1 = float(C)
+d1 = float(A/E)                                  # директриси x = ±4
 
-fig, ax = plt.subplots(figsize=(10, 6.5))
-fig.patch.set_facecolor('#f4f1ea')
-ax.set_facecolor('#fbfaf6')
+fig = plt.figure(figsize=(10, 6.5), facecolor='#f4f1ea')
+ax = plt.axes(xlim=(-13, 13), ylim=(-7.5, 7.5))
+ax.set_aspect('equal')
+ax.grid(True, alpha=0.3)
 
-# Внутрішня область гіперболи x^2/20 - y^2/5 >= 1 (там, де фокуси)
-Xg, Yg = np.meshgrid(np.linspace(-L, L, 600), np.linspace(-7.5, 7.5, 400))
-ax.contourf(Xg, Yg, Xg**2/af**2 - Yg**2/bf**2, levels=[1, 1e9], colors=['#cfe3f7'], alpha=0.6)
+# Гіпербола як лінія рівня x^2/20 - y^2/5 = 1, внутрішня область залита
+X, Y = np.meshgrid(np.linspace(-13, 13, 500), np.linspace(-7.5, 7.5, 400))
+Z = X**2/a1**2 - Y**2/b1**2
+ax.contourf(X, Y, Z, [1, 100], colors=['#cfe3f7'])
+ax.contour(X, Y, Z, [1], colors=['#1f4e9c'], linewidths=2.5)
+ax.plot([], [], color='#1f4e9c', lw=2.5, label='гіпербола $x^2/20-y^2/5=1$')
 
-# Основний прямокутник 2a x 2b, діагоналі якого лежать на асимптотах
-ax.add_patch(plt.Rectangle((-af, -bf), 2*af, 2*bf, fill=False, ec='#999', ls='-.', lw=1))
-ax.annotate('', xy=(af, -bf - 0.6), xytext=(0, -bf - 0.6), arrowprops=dict(arrowstyle='<->', color='#555'))
-ax.text(af/2, -bf - 1.2, r'$a=2\sqrt{5}$', ha='center', color='#555')
-ax.annotate('', xy=(-af - 0.6, bf), xytext=(-af - 0.6, 0), arrowprops=dict(arrowstyle='<->', color='#555'))
-ax.text(-af - 0.8, bf/2, r'$b=\sqrt{5}$', ha='right', va='center', color='#555')
+# Основний прямокутник 2a x 2b — його діагоналі лежать на асимптотах
+rect = Rectangle((-a1, -b1), 2*a1, 2*b1, fill=False, ec='gray', ls='-.')
+ax.add_patch(rect)
 
-# Гіпербола (дві гілки)
-T = np.linspace(-2.5, 2.5, 500)
-ax.plot(af*np.cosh(T), bf*np.sinh(T), color='#1f4e9c', lw=2.5,
-        label=r'$\dfrac{x^2}{20}-\dfrac{y^2}{5}=1$')
-ax.plot(-af*np.cosh(T), bf*np.sinh(T), color='#1f4e9c', lw=2.5)
+# Осі координат
+ax.plot([-13, 13], [0, 0], 'k', lw=0.8)
+ax.plot([0, 0], [-7.5, 7.5], 'k', lw=0.8)
+ax.text(12.5, 0.3, 'x', fontsize=12)
+ax.text(0.3, 7, 'y', fontsize=12)
 
-# Асимптоти та директриси
-Xa = np.array([-L, L])
-ax.plot(Xa, bf/af*Xa, color='#2e8b57', ls='--', lw=1.3, label=r'асимптоти $y=\pm\frac{1}{2}x$')
-ax.plot(Xa, -bf/af*Xa, color='#2e8b57', ls='--', lw=1.3)
-ax.axvline(d, color='#b03aa8', ls=':', lw=1.8, label=r'директриси $x=\pm4$')
-ax.axvline(-d, color='#b03aa8', ls=':', lw=1.8)
+# Асимптоти y = ±x/2
+xa = np.linspace(-13, 13, 2)
+ax.plot(xa, b1/a1*xa, 'g--', label='асимптоти $y=\\pm x/2$')
+ax.plot(xa, -b1/a1*xa, 'g--')
 
-# Задані точки перетину (±4, ±2)
-for px in (4, -4):
-    for py in (2, -2):
-        ax.plot(px, py, 'o', ms=8, color='#222', zorder=5)
-        ax.text(px + (0.3 if px > 0 else -0.3), py + (0.35 if py > 0 else -0.6),
-                f'({px}, {py})', ha='left' if px > 0 else 'right', fontsize=9)
+# Директриси x = ±4
+ax.plot([d1, d1], [-7.5, 7.5], 'm:', lw=2, label='директриси $x=\\pm4$')
+ax.plot([-d1, -d1], [-7.5, 7.5], 'm:', lw=2)
+
+# Задані точки (±4, ±2)
+ax.plot([4, 4, -4, -4], [2, -2, 2, -2], 'ko', ms=8, label='точки $(\\pm4, \\pm2)$')
+ax.text(4.3, 2.3, '(4, 2)')
+ax.text(4.3, -2.7, '(4, -2)')
+ax.text(-6.3, 2.3, '(-4, 2)')
+ax.text(-6.6, -2.7, '(-4, -2)')
 
 # Вершини і фокуси
-ax.plot([af, -af], [0, 0], 's', ms=7, color='#1f4e9c', zorder=5)
-ax.text(af - 0.2, 0.35, '$A_2$', ha='right', color='#1f4e9c')
-ax.text(-af + 0.2, 0.35, '$A_1$', color='#1f4e9c')
-ax.plot([cf, -cf], [0, 0], '*', ms=15, color='#d62728', zorder=5, label=r'фокуси $F_{1,2}(\pm5, 0)$')
-ax.text(cf + 0.2, -0.7, '$F_2$', color='#d62728', fontsize=12)
-ax.text(-cf - 0.7, -0.7, '$F_1$', color='#d62728', fontsize=12)
+ax.plot([a1, -a1], [0, 0], 'bs')
+ax.text(a1 - 0.9, 0.3, '$A_2$', color='b')
+ax.text(-a1 + 0.2, 0.3, '$A_1$', color='b')
+ax.plot([c1, -c1], [0, 0], 'r*', ms=15, label='фокуси $(\\pm5, 0)$')
+ax.text(c1, -0.8, '$F_2$', color='r', fontsize=12)
+ax.text(-c1 - 0.6, -0.8, '$F_1$', color='r', fontsize=12)
 
-# Осі та підписи
-ax.axhline(0, color='k', lw=0.8)
-ax.axvline(0, color='k', lw=0.8)
-ax.text(L - 0.3, 0.3, 'x', fontsize=12)
-ax.text(0.3, 7.0, 'y', fontsize=12)
-ax.text(0.15, -0.6, 'O')
-ax.set_xlim(-L, L)
-ax.set_ylim(-7.5, 7.5)
-ax.set_aspect('equal')
-ax.grid(alpha=0.3)
-ax.set_title('1.43. Гіпербола за точками перетину директрис і асимптот', fontsize=13, weight='bold')
+# Півосі a і b
+ax.annotate('', xy=(a1, -b1 - 0.6), xytext=(0, -b1 - 0.6), arrowprops=dict(arrowstyle='<->'))
+ax.text(1.5, -b1 - 1.3, '$a=2\\sqrt{5}$')
+ax.annotate('', xy=(-a1 - 0.6, b1), xytext=(-a1 - 0.6, 0), arrowprops=dict(arrowstyle='<->'))
+ax.text(-a1 - 3.3, 0.9, '$b=\\sqrt{5}$')
 
-info = '\n'.join([r'$\dfrac{x^2}{20}-\dfrac{y^2}{5}=1$',
-                  r'$a=2\sqrt{5},\ b=\sqrt{5},\ c=5$',
-                  r'$e=\dfrac{\sqrt{5}}{2}\approx$' + f'{ef:.3f}'])
-ax.text(-L + 0.4, 7.1, info, va='top', fontsize=11,
-        bbox=dict(boxstyle='round,pad=0.5', fc='white', ec='#1f4e9c'))
-ax.legend(loc='lower right', fontsize=9, framealpha=0.95)
+# Рамка з відповіддю
+bbox_properties = dict(boxstyle='round', fc='white', ec='#1f4e9c')
+ax.text(-12.5, 4.6, '$x^2/20-y^2/5=1$\n$a=2\\sqrt{5},\\ b=\\sqrt{5},\\ c=5$\n$e=\\sqrt{5}/2$',
+        fontsize=11, bbox=bbox_properties)
+ax.legend(loc='lower right', fontsize=9)
 
 
 # ---------------- Анімація ----------------
-# Точка M рухається по правій гілці, потім по лівій. Фокальні радіуси r1 = |F1M|, r2 = |F2M|
-# змінюються, а їх різниця |r1 - r2| = 2a лишається сталою — це і є означення гіперболи.
-N = 120                                              # кадрів на одну гілку
-Tm = np.concatenate([np.linspace(-2.2, 2.2, N), np.linspace(2.2, -2.2, N)])
-Sm = np.concatenate([np.ones(N), -np.ones(N)])       # 1 — права гілка, -1 — ліва
-
-r1_line, = ax.plot([], [], color='#ff7f0e', lw=2)
-r2_line, = ax.plot([], [], color='#9467bd', lw=2)
-trail, = ax.plot([], [], color='#ff7f0e', lw=4, alpha=0.35)
-point, = ax.plot([], [], 'o', ms=11, color='#ff7f0e', mec='k', zorder=6)
-label_M = ax.text(0, 0, '', fontsize=12, weight='bold')
-readout = ax.text(L - 0.4, 7.1, '', ha='right', va='top', fontsize=10, family='monospace',
-                  bbox=dict(boxstyle='round,pad=0.5', fc='#fff7e6', ec='#ff7f0e'))
-hist = []
+# Точка M рухається по правій гілці знизу вгору, потім по лівій згори вниз.
+# Фокальні радіуси r1 = |F1M| і r2 = |F2M| змінюються, а |r1 - r2| = 2a лишається сталим.
+N = 100                                          # кадрів на одну гілку
+line_r1, = ax.plot([], [], color='orange', lw=2)
+line_r2, = ax.plot([], [], color='purple', lw=2)
+trail, = ax.plot([], [], color='orange', lw=4, alpha=0.4)
+pc = plt.Circle((a1, 0), 0.25, fc='orange', ec='k', zorder=5)
+ax.add_patch(pc)
 
 
-def update(k):
-    s, tt = Sm[k], Tm[k]
-    mx, my = s*af*np.cosh(tt), bf*np.sinh(tt)
-    if k % N == 0:
-        hist.clear()                                 # нова гілка — новий слід
-    hist.append((mx, my))
-    r1 = np.hypot(mx + cf, my)
-    r2 = np.hypot(mx - cf, my)
-    r1_line.set_data([-cf, mx], [0, my])
-    r2_line.set_data([cf, mx], [0, my])
-    trail.set_data(*zip(*hist))
-    point.set_data([mx], [my])
-    label_M.set_position((mx + 0.3, my + 0.3))
-    label_M.set_text('M')
-    point.set_color(plt.cm.plasma(k / len(Tm)))
-    readout.set_text(f'M = ({mx:6.2f}, {my:6.2f})\n'
-                     f'r1 = |F1M| = {r1:6.3f}\n'
-                     f'r2 = |F2M| = {r2:6.3f}\n'
-                     f'|r1 - r2| = {abs(r1 - r2):6.3f}\n'
-                     f'2a        = {2*af:6.3f}')
-    return r1_line, r2_line, trail, point, label_M, readout
+def redraw(i):
+    if i < N:                                    # права гілка: y від -6 до 6
+        yy = np.linspace(-6, -6 + 12*i/(N - 1), i + 1)
+        xx = a1*np.sqrt(1 + yy**2/b1**2)
+    else:                                        # ліва гілка: y від 6 до -6
+        yy = np.linspace(6, 6 - 12*(i - N)/(N - 1), i - N + 1)
+        xx = -a1*np.sqrt(1 + yy**2/b1**2)
+    xm = xx[-1]                                  # поточне положення точки M
+    ym = yy[-1]
+    trail.set_data(xx, yy)
+    pc.center = (xm, ym)
+    line_r1.set_data([-c1, xm], [0, ym])
+    line_r2.set_data([c1, xm], [0, ym])
+    r1 = np.sqrt((xm + c1)**2 + ym**2)
+    r2 = np.sqrt((xm - c1)**2 + ym**2)
+    ax.set_title('r1 = ' + str(round(r1, 3)) + ',   r2 = ' + str(round(r2, 3)) +
+                 ',   |r1 - r2| = ' + str(round(abs(r1 - r2), 3)) +
+                 ' = 2a = ' + str(round(2*a1, 3)))
 
 
-anim = FuncAnimation(fig, update, frames=len(Tm), interval=40, blit=False)
-plt.tight_layout()
+anim = animation.FuncAnimation(fig, redraw, frames=2*N, interval=40)
 plt.show()
