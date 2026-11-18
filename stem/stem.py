@@ -49,26 +49,28 @@ X, Y = np.meshgrid(np.linspace(-xmax, xmax, 400), np.linspace(-ymax, ymax, 400))
 Z = X**2/a1**2 - Y**2/b1**2
 ax.contourf(X, Y, Z, [1, Z.max()], colors=['#cfe3f7'])
 ax.contour(X, Y, Z, [1], colors=['b'], linewidths=2.5)
-ax.plot([], [], 'b', lw=2.5, label='гіпербола $' + latex(hyp) + '=1$')
+eq_text = 'x²/' + str(A**2) + ' - y²/' + str(B**2) + ' = 1'    # рівняння як текст
+ax.plot([], [], 'b', lw=2.5, label='гіпербола ' + eq_text)
 
 ax.plot([-xmax, xmax], [0, 0], 'k', lw=0.8)
 ax.plot([0, 0], [-ymax, ymax], 'k', lw=0.8)
-ax.plot([-xmax, xmax], [-k1*xmax, k1*xmax], 'g--', label='асимптоти $y=\\pm' + latex(K) + 'x$')
+ax.plot([-xmax, xmax], [-k1*xmax, k1*xmax], 'g--', label='асимптоти y = ±' + str(K) + '·x')
 ax.plot([-xmax, xmax], [k1*xmax, -k1*xmax], 'g--')
-ax.plot([d1, d1], [-ymax, ymax], 'm:', lw=2, label='директриси $x=\\pm' + latex(D) + '$')
+ax.plot([d1, d1], [-ymax, ymax], 'm:', lw=2, label='директриси x = ±' + str(D))
 ax.plot([-d1, -d1], [-ymax, ymax], 'm:', lw=2)
-ax.plot([c1, -c1], [0, 0], 'r*', ms=15, label='фокуси $(\\pm' + latex(C) + ', 0)$')
-ax.text(c1, -2*h, '$F_2$', color='r', fontsize=12)
-ax.text(-c1 - h, -2*h, '$F_1$', color='r', fontsize=12)
+ax.plot([c1, -c1], [0, 0], 'r*', ms=15, label='фокуси (±' + str(C) + ', 0)')
+ax.text(c1, -2*h, 'F2', color='r', fontsize=12)
+ax.text(-c1 - h, -2*h, 'F1', color='r', fontsize=12)
 
 for qx, qy in [(px, py), (px, -py), (-px, py), (-px, -py)]:
     ax.plot(qx, qy, 'ko', ms=8)
     ax.text(qx - 2*h, qy + h, '(' + str(qx) + ', ' + str(qy) + ')')
 
-ax.text(-xmax + h, ymax - 7*h,
-        '$' + latex(hyp) + '=1$\n$a=' + latex(A) + ',\\ b=' + latex(B) + ',\\ c=' + latex(C) +
-        '$\n$e=' + latex(E) + '$',
-        fontsize=11, bbox=dict(boxstyle='round', fc='white', ec='b'))
+answer = (eq_text + '\n' +
+          'a² = ' + str(A**2) + ',  b² = ' + str(B**2) + ',  c = ' + str(C) + '\n' +
+          'e = ' + str(E))
+ax.text(-xmax + h, ymax - 5*h, answer, fontsize=11,
+        bbox=dict(boxstyle='round', fc='white', ec='b'))
 ax.legend(loc='upper center', fontsize=9)
 
 # ---------------- Анімація ----------------
